@@ -75,20 +75,24 @@ const initialExtra: ExtraAnswers = {
 type MeasurementGuide = {
   title: string;
   url: string;
+  imageUrl: string;
 };
 
 const measurementGuides = {
   grip: {
     title: "握力の測定方法",
     url: "/measurement-guides/grip.pdf",
+    imageUrl: "/measurement-guides/images/grip.png",
   },
   forwardBend: {
     title: "立位体前屈の測定方法",
     url: "/measurement-guides/forward-bend.pdf",
+    imageUrl: "/measurement-guides/images/forward-bend.png",
   },
   balance: {
     title: "閉眼片足立ちの測定方法",
     url: "/measurement-guides/one-leg-stand.pdf",
+    imageUrl: "/measurement-guides/images/one-leg-stand.png",
   },
 } satisfies Record<string, MeasurementGuide>;
 
@@ -996,11 +1000,12 @@ function MeasurementGuideModal({
             <X size={20} />
           </button>
         </div>
-        <div className="h-[62vh] bg-slate-100 sm:h-[70vh]">
-          <iframe
-            title={guide.title}
-            src={`${guide.url}#toolbar=0&navpanes=0&view=FitH`}
-            className="h-full w-full border-0"
+        <div className="max-h-[62vh] overflow-auto bg-slate-100 p-2 sm:max-h-[70vh]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={guide.imageUrl}
+            alt={guide.title}
+            className="mx-auto h-auto w-full max-w-3xl rounded bg-white shadow-sm"
           />
         </div>
         <div className="flex items-center justify-between gap-2 border-t border-slate-200 p-3">
