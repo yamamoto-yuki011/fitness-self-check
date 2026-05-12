@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 3分体力セルフチェック
 
-## Getting Started
+紙の評価表のQRコードからアクセスし、ブラウザ上で体力チェック結果とおすすめ運動を表示するMVPです。
 
-First, run the development server:
+## 実装内容
+
+- Next.js App Router + TypeScript
+- Tailwind CSS
+- shadcn/ui 方式のローカルUIコンポーネント
+- Recharts のレーダーチャート
+- Supabase `exercises` テーブル連携
+- Supabase未設定でもseedデータで診断可能
+- `/admin` 簡易パスワード認証つき運動管理
+- `/business` 企業向けCTAの仮ページ
+
+## ローカル起動
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`.env.local` の `ADMIN_PASSWORD` を設定します。Supabaseなしで試す場合、Supabase項目は空のままで動きます。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+ブラウザで開きます。
 
-## Learn More
+- 診断: http://localhost:3000
+- 管理画面: http://localhost:3000/admin
 
-To learn more about Next.js, take a look at the following resources:
+## Supabaseテーブル作成
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Supabase SQL Editorで以下を順に実行します。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. `supabase/schema.sql`
+2. `supabase/seed.sql`
 
-## Deploy on Vercel
+`schema.sql` は `exercises` テーブル、index、RLS policyを作成します。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Vercel環境変数
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+ADMIN_PASSWORD=管理画面用パスワード
+NEXT_PUBLIC_SUPABASE_URL=Supabase Project URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY=Supabase anon public key
+SUPABASE_SERVICE_ROLE_KEY=Supabase service_role key
+```
+
+`SUPABASE_SERVICE_ROLE_KEY` は管理APIの追加・編集・公開ON/OFFで使います。クライアントへ公開されないサーバー側環境変数として設定してください。
+
+## 補足
+
+初期版では診断結果、追加質問、個人情報は保存しません。運動データのみSupabaseで管理する想定です。
