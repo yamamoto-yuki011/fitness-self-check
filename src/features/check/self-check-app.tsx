@@ -15,6 +15,7 @@ import {
   RotateCcw,
   ShieldCheck,
   Target,
+  UserRoundCheck,
   X,
 } from "lucide-react";
 import {
@@ -524,24 +525,11 @@ function ResultScreen({ result, onBack, onNext }: { result: CheckResult; onBack:
 
           <MeasurementPointStrip />
 
-          <div className="grid gap-3">
-            <FeedbackBox
-              icon={<Target size={18} />}
-              title="体力の傾向"
-              text={feedback.tendency}
-              className={feedback.soft}
-            />
-            <FeedbackBox
-              icon={<Lightbulb size={18} />}
-              title="日常のアドバイス"
-              text={feedback.advice}
-              className={feedback.soft}
-            />
-          </div>
+          <TrainerAdvice tendency={feedback.tendency} advice={feedback.advice} />
         </div>
       </div>
       <Button size="lg" className="w-full" onClick={onNext}>
-        もっと自分向けの運動を見る
+        軽労化トレーナーがあなたにぴったりの運動を提案します
         <ArrowRight size={18} />
       </Button>
       <Button variant="outline" className="w-full" onClick={onBack}>
@@ -658,9 +646,10 @@ function RecommendScreen({
           </div>
 
           <div className="rounded-lg bg-white p-4 text-slate-950 shadow-lg">
-            <p className="text-sm leading-7 text-slate-700">
-              総合ランク{result.rank}と低かった項目、追加質問の内容から、今取り組みやすい運動を選びました。
-            </p>
+            <LineTrainerMessage
+              title="軽労化トレーナー"
+              message={`総合ランク${result.rank}と低かった項目、追加質問の内容から、今取り組みやすい運動を3つ提案します。まずは気持ちよくできそうなものを1つ選んでみましょう。`}
+            />
             <div className="mt-3 grid grid-cols-3 gap-2">
               <ScorePill label="筋力" score={result.gripScore} />
               <ScorePill label="柔軟性" score={result.flexibilityScore} />
@@ -691,10 +680,11 @@ function RecommendScreen({
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <p className="text-sm leading-7 text-slate-700">{exercise.description}</p>
-                  <div className="rounded-lg bg-blue-50 p-3 text-xs leading-6 text-blue-800">
-                    <span className="font-black">選ばれた理由: </span>
-                    {recommendationReason(exercise, result)}
-                  </div>
+                  <LineTrainerMessage
+                    compact
+                    title="トレーナー"
+                    message={recommendationReason(exercise, result)}
+                  />
                   {exercise.caution && (
                     <p className="rounded-lg bg-amber-50 p-3 text-xs leading-6 text-amber-800">
                       {exercise.caution}
@@ -735,24 +725,82 @@ function recommendationReason(exercise: Exercise, result: CheckResult) {
   return "現在の結果と相性がよく、無理なく体力づくりにつなげやすい運動です。";
 }
 
-function FeedbackBox({
-  icon,
+function TrainerAdvice({ tendency, advice }: { tendency: string; advice: string }) {
+  return (
+    <div className="rounded-lg border border-sky-100 bg-white p-4 text-slate-950 shadow-lg">
+      <LineTrainerAdviceBubble tendency={tendency} advice={advice} />
+    </div>
+  );
+}
+
+function LineTrainerAdviceBubble({ tendency, advice }: { tendency: string; advice: string }) {
+  return (
+    <div className="flex items-end gap-2">
+      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-sky-600 text-white shadow-sm">
+        <UserRoundCheck size={20} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="mb-1 ml-2 text-[11px] font-black text-slate-500">軽労化トレーナー</p>
+        <div className="relative inline-block max-w-full rounded-[20px] rounded-bl-md bg-[#9EEA6A] px-4 py-3 text-slate-900 shadow-sm">
+          <span className="absolute -left-1 bottom-2 h-3 w-3 rotate-45 bg-[#9EEA6A]" />
+          <div className="space-y-4">
+            <div>
+              <div className="mb-1 flex items-center gap-1.5 text-xs font-black text-emerald-900">
+                <Target size={16} />
+                体力の傾向
+              </div>
+              <p className="text-sm font-semibold leading-7">{tendency}</p>
+            </div>
+
+            <div>
+              <div className="mb-1 flex items-center gap-1.5 text-xs font-black text-emerald-900">
+                <Lightbulb size={16} />
+                日常のアドバイス
+              </div>
+              <p className="text-sm font-semibold leading-7">{advice}</p>
+            </div>
+
+            <p className="text-sm font-semibold leading-7">
+              無理に頑張りすぎず、今日できそうなことを一つ選ぶところから始めましょう。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LineTrainerMessage({
   title,
-  text,
-  className,
+  label,
+  icon,
+  message,
+  compact = false,
 }: {
-  icon: React.ReactNode;
   title: string;
-  text: string;
-  className: string;
+  label?: string;
+  icon?: React.ReactNode;
+  message: string;
+  compact?: boolean;
 }) {
   return (
-    <div className={cn("rounded-lg border p-4", className)}>
-      <div className="mb-2 flex items-center gap-2">
-        {icon}
-        <p className="text-sm font-black">{title}</p>
+    <div className="flex items-end gap-2">
+      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-sky-600 text-white shadow-sm">
+        <UserRoundCheck size={compact ? 18 : 20} />
       </div>
-      <p className="text-sm leading-7 text-slate-700">{text}</p>
+      <div className="min-w-0 flex-1">
+        <p className="mb-1 ml-2 text-[11px] font-black text-slate-500">{title}</p>
+        <div className="relative inline-block max-w-full rounded-[20px] rounded-bl-md bg-[#9EEA6A] px-4 py-3 text-slate-900 shadow-sm">
+          <span className="absolute -left-1 bottom-2 h-3 w-3 rotate-45 bg-[#9EEA6A]" />
+          {label && (
+            <div className="mb-1 flex items-center gap-1.5 text-xs font-black text-emerald-900">
+              {icon}
+              {label}
+            </div>
+          )}
+          <p className={cn("font-semibold leading-7", compact ? "text-xs" : "text-sm")}>{message}</p>
+        </div>
+      </div>
     </div>
   );
 }

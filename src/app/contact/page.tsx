@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -6,7 +9,6 @@ import {
   CheckCircle2,
   ClipboardList,
   Mail,
-  MessageSquareText,
   PhoneCall,
   UsersRound,
 } from "lucide-react";
@@ -24,6 +26,39 @@ const consultationItems = [
 ];
 
 export default function ContactPage() {
+  const [company, setCompany] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [message, setMessage] = useState("");
+
+  function toggleItem(item: string) {
+    setSelectedItems((current) =>
+      current.includes(item) ? current.filter((value) => value !== item) : [...current, item],
+    );
+  }
+
+  function sendMail() {
+    const subject = "【軽労化ナビ】導入相談・お問い合わせ";
+    const body = [
+      "軽労化ナビ 導入相談・お問い合わせ",
+      "",
+      `会社名: ${company}`,
+      `ご担当者名: ${name}`,
+      `メールアドレス: ${email}`,
+      `電話番号: ${phone}`,
+      `相談したい内容: ${selectedItems.length > 0 ? selectedItems.join("、") : "未選択"}`,
+      "",
+      "ご相談内容:",
+      message || "未入力",
+      "",
+      "送信元: 3分体力セルフチェック",
+    ].join("\n");
+
+    window.location.href = `mailto:info@smartsupport.co.jp?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  }
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-sky-50/50 to-emerald-50/40 px-4 py-8">
       <div className="mx-auto max-w-5xl space-y-6">
@@ -62,17 +97,17 @@ export default function ContactPage() {
                 <p className="text-sm font-black uppercase tracking-[0.14em] text-sky-700">Request</p>
                 <h2 className="mt-1 text-2xl font-black text-slate-950">相談内容を送る</h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  現時点では送信機能は未接続です。フォーム内容をもとに、正式な送信先を接続できます。
+                  入力内容をメール本文にまとめ、`info@smartsupport.co.jp` 宛のメール作成画面を開きます。
                 </p>
               </div>
 
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={(event) => event.preventDefault()}>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Field label="会社名" placeholder="株式会社〇〇" />
-                  <Field label="ご担当者名" placeholder="山田 太郎" />
+                  <Field label="会社名" placeholder="株式会社〇〇" value={company} onChange={setCompany} />
+                  <Field label="ご担当者名" placeholder="山田 太郎" value={name} onChange={setName} />
                 </div>
-                <Field label="メールアドレス" placeholder="example@company.co.jp" type="email" />
-                <Field label="電話番号" placeholder="011-000-0000" />
+                <Field label="メールアドレス" placeholder="example@company.co.jp" type="email" value={email} onChange={setEmail} />
+                <Field label="電話番号" placeholder="011-000-0000" value={phone} onChange={setPhone} />
 
                 <div className="space-y-2">
                   <Label>相談したい内容</Label>
@@ -82,7 +117,12 @@ export default function ContactPage() {
                         key={item}
                         className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700"
                       >
-                        <input type="checkbox" className="h-4 w-4 accent-sky-600" />
+                        <input
+                          type="checkbox"
+                          checked={selectedItems.includes(item)}
+                          onChange={() => toggleItem(item)}
+                          className="h-4 w-4 accent-sky-600"
+                        />
                         {item}
                       </label>
                     ))}
@@ -93,13 +133,20 @@ export default function ContactPage() {
                   <Label htmlFor="message">ご相談内容</Label>
                   <textarea
                     id="message"
+                    value={message}
+                    onChange={(event) => setMessage(event.target.value)}
                     placeholder="例：製造現場で腰痛対策の体力測定イベントを検討しています。"
                     className="min-h-32 w-full rounded-lg border border-slate-200 bg-white p-3 text-sm leading-6 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
                   />
                 </div>
 
-                <Button type="button" size="lg" className="h-14 w-full rounded-full bg-sky-700 text-base hover:bg-sky-800">
-                  送信機能を接続予定
+                <Button
+                  type="button"
+                  size="lg"
+                  onClick={sendMail}
+                  className="h-14 w-full rounded-full bg-sky-700 text-base hover:bg-sky-800"
+                >
+                  メールを作成する
                   <ArrowRight size={18} />
                 </Button>
               </form>
@@ -111,7 +158,13 @@ export default function ContactPage() {
           <CardContent className="grid gap-3 p-5 sm:grid-cols-3">
             <MiniPoint icon={<CheckCircle2 size={18} />} text="体験会・デモ測定の相談可能" />
             <MiniPoint icon={<PhoneCall size={18} />} text="導入前のヒアリングから対応" />
-            <MiniPoint icon={<MessageSquareText size={18} />} text="社内説明用の相談も可能" />
+            <a
+              href="tel:011-206-1462"
+              className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-bold text-emerald-800 transition hover:bg-emerald-50"
+            >
+              <PhoneCall size={18} />
+              電話 011-206-1462
+            </a>
           </CardContent>
         </Card>
       </div>
@@ -122,16 +175,20 @@ export default function ContactPage() {
 function Field({
   label,
   placeholder,
+  value,
+  onChange,
   type = "text",
 }: {
   label: string;
   placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
   type?: string;
 }) {
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
-      <Input type={type} placeholder={placeholder} />
+      <Input type={type} placeholder={placeholder} value={value} onChange={(event) => onChange(event.target.value)} />
     </div>
   );
 }

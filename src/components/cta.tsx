@@ -15,7 +15,7 @@ export function CtaBlock({
 }) {
   return (
     <div className="mt-6 grid gap-4">
-      <p className="text-center text-sm font-black text-sky-800">【簡易版じゃ物足りない方へ】</p>
+      <p className="text-center text-sm font-black text-sky-800">【企業での体力測定をご検討の方へ】</p>
       <Card className="overflow-hidden border-sky-100 bg-white shadow-md">
         <CardContent className="p-0">
           <div className="relative overflow-hidden bg-gradient-to-r from-white via-sky-50/70 to-sky-100/80">
@@ -33,7 +33,7 @@ export function CtaBlock({
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.14em] text-sky-600">For Companies</p>
                   <h2 className="text-lg font-black leading-snug text-slate-950 sm:text-xl">
-                    企業で体力測定イベント実施しませんか？
+                    体力測定イベント実施しませんか？
                   </h2>
                 </div>
               </div>

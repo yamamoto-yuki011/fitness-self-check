@@ -122,7 +122,9 @@ export default function BusinessPage() {
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-14 rounded-full border-sky-200 bg-white/90 px-7 text-base text-sky-800">
-                <Link href="/contact">資料請求する</Link>
+                <a href="https://smartsupport.co.jp" target="_blank" rel="noreferrer">
+                  詳細ページ確認
+                </a>
               </Button>
             </div>
           </div>
@@ -244,10 +246,10 @@ export default function BusinessPage() {
                 <Link href="/contact">導入相談する</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-14 rounded-full border-white/30 bg-transparent px-7 text-base text-white hover:bg-white/10">
-                <Link href="/contact">
+                <a href="https://smartsupport.co.jp" target="_blank" rel="noreferrer">
                   <FileText size={18} />
-                  資料請求する
-                </Link>
+                  詳細ページ確認
+                </a>
               </Button>
             </div>
           </div>
