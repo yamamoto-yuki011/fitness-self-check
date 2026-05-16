@@ -116,10 +116,10 @@ export default function BusinessPage() {
 
             <div className="flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg" className="h-14 rounded-full bg-sky-700 px-7 text-base hover:bg-sky-800">
-                <Link href="/contact">
+                <a href="https://smartsupport.co.jp/contact" target="_blank" rel="noreferrer">
                   導入相談する
                   <ArrowRight size={18} />
-                </Link>
+                </a>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-14 rounded-full border-sky-200 bg-white/90 px-7 text-base text-sky-800">
                 <a href="https://smartsupport.co.jp" target="_blank" rel="noreferrer">
@@ -243,7 +243,9 @@ export default function BusinessPage() {
             </div>
             <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
               <Button asChild size="lg" className="h-14 rounded-full bg-emerald-500 px-7 text-base text-slate-950 hover:bg-emerald-400">
-                <Link href="/contact">導入相談する</Link>
+                <a href="https://smartsupport.co.jp/contact" target="_blank" rel="noreferrer">
+                  導入相談する
+                </a>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-14 rounded-full border-white/30 bg-transparent px-7 text-base text-white hover:bg-white/10">
                 <a href="https://smartsupport.co.jp" target="_blank" rel="noreferrer">
