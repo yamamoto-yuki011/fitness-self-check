@@ -62,9 +62,9 @@ export function calculateResult(input: CheckInput): CheckResult {
 }
 
 export const rankStyles: Record<Rank, { text: string; bg: string; ring: string }> = {
-  A: { text: "text-emerald-700", bg: "bg-emerald-100", ring: "ring-emerald-200" },
-  B: { text: "text-sky-700", bg: "bg-sky-100", ring: "ring-sky-200" },
-  C: { text: "text-blue-700", bg: "bg-blue-100", ring: "ring-blue-200" },
-  D: { text: "text-amber-700", bg: "bg-amber-100", ring: "ring-amber-200" },
+  A: { text: "text-teal-700", bg: "bg-teal-100", ring: "ring-teal-200" },
+  B: { text: "text-emerald-700", bg: "bg-emerald-100", ring: "ring-emerald-200" },
+  C: { text: "text-amber-700", bg: "bg-amber-100", ring: "ring-amber-200" },
+  D: { text: "text-orange-700", bg: "bg-orange-100", ring: "ring-orange-200" },
   E: { text: "text-rose-700", bg: "bg-rose-100", ring: "ring-rose-200" },
 };

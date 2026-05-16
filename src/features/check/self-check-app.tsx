@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
@@ -104,8 +105,8 @@ const rankFeedback = {
     tendency: "筋力・柔軟性・バランス能力の土台が安定しており、健康的な状態です。",
     advice: "今後は維持が大切です。定期的に身体を動かし、運動習慣を続けましょう。",
     exercises: ["軽い筋トレ", "ジョギング・ウォーキング", "キックボクシング", "ストレッチの習慣化"],
-    accent: "from-emerald-600 to-green-500",
-    soft: "bg-emerald-50 border-emerald-100 text-emerald-800",
+    accent: "from-teal-600 to-cyan-500",
+    soft: "bg-teal-50 border-teal-100 text-teal-800",
   },
   B: {
     score: "10〜12点",
@@ -113,8 +114,8 @@ const rankFeedback = {
     tendency: "全体的には良好ですが、筋力・柔軟性・バランスのどこかに伸ばせる余地があります。",
     advice: "運動習慣をつけることでさらに良い状態を目指せます。無理なく続けられる運動から始めましょう。",
     exercises: ["ウォーキング", "スクワット", "ストレッチ", "軽い体幹トレーニング"],
-    accent: "from-amber-500 to-orange-400",
-    soft: "bg-amber-50 border-amber-100 text-amber-800",
+    accent: "from-emerald-600 to-green-500",
+    soft: "bg-emerald-50 border-emerald-100 text-emerald-800",
   },
   C: {
     score: "7〜9点",
@@ -122,8 +123,8 @@ const rankFeedback = {
     tendency: "疲れやすさや不調が出やすい状態かもしれません。体調にも影響が出やすい段階です。",
     advice: "まずは毎日少し動く習慣を作ることが大切です。こまめに身体を動かしましょう。",
     exercises: ["毎日のストレッチ", "片足立ち練習", "体幹トレーニング", "軽いウォーキング"],
-    accent: "from-orange-500 to-red-400",
-    soft: "bg-orange-50 border-orange-100 text-orange-800",
+    accent: "from-amber-500 to-orange-400",
+    soft: "bg-amber-50 border-amber-100 text-amber-800",
   },
   D: {
     score: "4〜6点",
@@ -131,8 +132,8 @@ const rankFeedback = {
     tendency: "身体機能の回復が必要な状態です。疲れやすく、転倒などのリスクも高まりやすいです。",
     advice: "無理をせず、安全な範囲で身体を動かすことが大切です。少しずつ、できることから取り組みましょう。",
     exercises: ["椅子スクワット", "椅子体操", "軽いストレッチ", "呼吸を意識した体操"],
-    accent: "from-purple-600 to-violet-500",
-    soft: "bg-violet-50 border-violet-100 text-violet-800",
+    accent: "from-orange-600 to-red-500",
+    soft: "bg-orange-50 border-orange-100 text-orange-800",
   },
   E: {
     score: "3点以下",
@@ -220,6 +221,75 @@ export function SelfCheckApp() {
   );
 }
 
+function useCountUp(target: number, duration = 900) {
+  const [value, setValue] = useState(0);
+
+  useEffect(() => {
+    let frameId = 0;
+    const startedAt = performance.now();
+
+    function tick(now: number) {
+      const progress = Math.min((now - startedAt) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setValue(Math.round(target * eased));
+
+      if (progress < 1) {
+        frameId = requestAnimationFrame(tick);
+      }
+    }
+
+    frameId = requestAnimationFrame(tick);
+
+    return () => cancelAnimationFrame(frameId);
+  }, [duration, target]);
+
+  return value;
+}
+
+function getFitnessType(result: CheckResult) {
+  const scores = [
+    { key: "grip", score: result.gripScore },
+    { key: "flexibility", score: result.flexibilityScore },
+    { key: "balance", score: result.balanceScore },
+  ];
+  const lowCount = scores.filter((item) => item.score <= 2).length;
+  const minScore = Math.min(...scores.map((item) => item.score));
+  const lowest = scores.find((item) => item.score === minScore)?.key;
+
+  if (lowCount >= 2) {
+    return {
+      title: "体力リスタートタイプ",
+      advice: "まずは短時間でできる運動を選び、毎日の生活に少しずつ身体を動かす時間を足していきましょう。",
+    };
+  }
+
+  if (scores.every((item) => item.score >= 4)) {
+    return {
+      title: "体力バランス良好タイプ",
+      advice: "筋力・柔軟性・バランスの土台が整っています。今の良い状態を保つ運動習慣を続けましょう。",
+    };
+  }
+
+  if (lowest === "grip") {
+    return {
+      title: "筋力サポートタイプ",
+      advice: "握る力や全身の筋力を支える運動から始めると、日常動作の安定感につながります。",
+    };
+  }
+
+  if (lowest === "flexibility") {
+    return {
+      title: "柔軟性不足タイプ",
+      advice: "まずはストレッチ習慣から始めましょう。腰や股関節まわりをゆっくり動かすことがポイントです。",
+    };
+  }
+
+  return {
+    title: "バランス見直しタイプ",
+    advice: "片足立ちや体幹を使う軽い運動で、ふらつきにくい身体づくりを進めましょう。",
+  };
+}
+
 function TopScreen({ onStart }: { onStart: () => void }) {
   return (
     <section className="flex flex-1 flex-col gap-6 pb-8">
@@ -249,6 +319,17 @@ function TopScreen({ onStart }: { onStart: () => void }) {
             <p className="mx-auto max-w-md text-base font-bold leading-8 text-white/90">
               握力・立位体前屈・閉眼片足立ちの3項目で、筋力・柔軟性・バランスを確認します。
             </p>
+          </div>
+
+          <div className="flex max-w-sm flex-wrap justify-center gap-2">
+            {["会員登録不要", "スマホでそのまま診断", "結果はその場で表示"].map((badge) => (
+              <span
+                key={badge}
+                className="rounded-full bg-white/18 px-3 py-1.5 text-xs font-black text-white shadow-sm ring-1 ring-white/25 backdrop-blur"
+              >
+                {badge}
+              </span>
+            ))}
           </div>
 
           <Button
@@ -378,6 +459,7 @@ function InputScreen({
               label="握力 kg"
               onOpen={() => setActiveGuide(measurementGuides.grip)}
             />
+            <p className="text-xs font-bold text-slate-500">筋力の目安</p>
             <Input
               id="grip"
               inputMode="decimal"
@@ -394,6 +476,7 @@ function InputScreen({
               label="立位体前屈"
               onOpen={() => setActiveGuide(measurementGuides.forwardBend)}
             />
+            <p className="text-xs font-bold text-slate-500">柔軟性の目安</p>
             <div className="grid gap-2">
               {forwardBendOptions.map((option) => (
                 <button
@@ -422,6 +505,7 @@ function InputScreen({
               label="閉眼片足立ち 秒"
               onOpen={() => setActiveGuide(measurementGuides.balance)}
             />
+            <p className="text-xs font-bold text-slate-500">バランスの目安</p>
             <Input
               id="balance"
               inputMode="numeric"
@@ -460,6 +544,8 @@ function InputScreen({
 function ResultScreen({ result, onBack, onNext }: { result: CheckResult; onBack: () => void; onNext: () => void }) {
   const style = rankStyles[result.rank];
   const feedback = rankFeedback[result.rank];
+  const displayedTotal = useCountUp(result.total);
+  const fitnessType = getFitnessType(result);
   const chartData = [
     { subject: "筋力", score: result.gripScore },
     { subject: "柔軟性", score: result.flexibilityScore },
@@ -485,13 +571,18 @@ function ResultScreen({ result, onBack, onNext }: { result: CheckResult; onBack:
             </span>
           </div>
 
-          <div className="rounded-lg bg-white p-4 text-slate-950 shadow-lg">
+          <div className="rounded-lg bg-white p-4 text-slate-950 shadow-lg [animation:fade-in-up_520ms_ease-out_both]">
+            <div className="mb-4 rounded-lg border border-sky-100 bg-sky-50/80 p-4">
+              <h2 className="text-lg font-black text-slate-950">今の体力バランスが見えてきました</h2>
+              <p className="mt-2 text-sm font-semibold leading-7 text-slate-700">
+                結果は良し悪しではなく、これからの運動習慣づくりのヒントです。まずは自分の身体の状態を知ることから始めましょう。
+              </p>
+            </div>
             <div className="flex items-center gap-4">
               <div
                 className={cn(
-                  "grid h-24 w-24 shrink-0 place-items-center rounded-full text-5xl font-black ring-8",
-                  style.bg,
-                  style.text,
+                  "grid h-28 w-28 shrink-0 place-items-center rounded-full bg-gradient-to-br text-6xl font-black text-white shadow-xl ring-8 [animation:rank-pop_650ms_ease-out_both]",
+                  feedback.accent,
                   style.ring,
                 )}
               >
@@ -500,7 +591,7 @@ function ResultScreen({ result, onBack, onNext }: { result: CheckResult; onBack:
               <div>
                 <p className="text-sm font-semibold text-slate-500">{feedback.score}</p>
                 <p className="text-4xl font-black text-slate-950">
-                  {result.total}
+                  {displayedTotal}
                   <span className="text-base text-slate-500"> / 15点</span>
                 </p>
                 <p className="mt-1 text-sm font-bold text-slate-800">{feedback.label}</p>
@@ -508,11 +599,13 @@ function ResultScreen({ result, onBack, onNext }: { result: CheckResult; onBack:
             </div>
           </div>
 
-          <div className="rounded-lg bg-white p-4 text-slate-950 shadow-lg">
+          <FitnessTypeCard title={fitnessType.title} advice={fitnessType.advice} />
+
+          <div className="rounded-lg bg-white p-4 text-slate-950 shadow-lg [animation:fade-in-up_520ms_ease-out_120ms_both]">
             <FiveLevelScore result={result} />
           </div>
 
-          <div className="h-72 w-full rounded-lg bg-white p-2 shadow-lg">
+          <div className="h-72 w-full rounded-lg bg-white p-2 shadow-lg [animation:soft-fade_700ms_ease-out_260ms_both]">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={chartData}>
                 <PolarGrid stroke="#cbd5e1" />
@@ -528,15 +621,89 @@ function ResultScreen({ result, onBack, onNext }: { result: CheckResult; onBack:
           <TrainerAdvice tendency={feedback.tendency} advice={feedback.advice} />
         </div>
       </div>
-      <Button size="lg" className="w-full" onClick={onNext}>
-        軽労化トレーナーがあなたにぴったりの運動を提案します
-        <ArrowRight size={18} />
-      </Button>
+      <PersonalizedExerciseCta onClick={onNext} />
       <Button variant="outline" className="w-full" onClick={onBack}>
         入力を修正する
       </Button>
-      <CtaBlock rank={result.rank} showFitnessBanner={false} />
+      <ResultBusinessCta />
     </section>
+  );
+}
+
+function FitnessTypeCard({ title, advice }: { title: string; advice: string }) {
+  return (
+    <div className="rounded-lg bg-white p-4 text-slate-950 shadow-lg [animation:fade-in-up_520ms_ease-out_80ms_both]">
+      <div className="flex items-start gap-3">
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-700">
+          <Target size={22} />
+        </span>
+        <div className="space-y-2">
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-emerald-700">Fitness Type</p>
+          <h2 className="text-xl font-black leading-tight text-slate-950">あなたは：{title}</h2>
+          <p className="text-sm font-semibold leading-7 text-slate-700">{advice}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PersonalizedExerciseCta({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-500 via-sky-500 to-blue-600 p-[2px] text-left shadow-xl transition-all hover:-translate-y-0.5 hover:shadow-2xl active:translate-y-0"
+    >
+      <span className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/20 blur-xl transition group-hover:scale-125" />
+      <span className="absolute bottom-0 left-8 h-16 w-16 rounded-full bg-white/10 blur-lg" />
+      <span className="relative flex min-h-24 items-center gap-3 rounded-2xl bg-white/12 px-4 py-4 text-white ring-1 ring-white/25 backdrop-blur-sm">
+        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-white text-sky-600 shadow-lg transition group-hover:scale-105">
+          <UserRoundCheck size={28} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="mb-1 inline-flex rounded-full bg-white/20 px-2.5 py-1 text-[11px] font-black ring-1 ring-white/25">
+            次のステップ
+          </span>
+          <span className="block text-lg font-black leading-snug">
+            軽労化トレーナーがあなたにぴったりの運動を提案します
+          </span>
+          <span className="mt-1 block text-xs font-bold text-white/85">
+            追加質問に答えると、より自分向けの3つを表示します。
+          </span>
+        </span>
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white text-blue-700 shadow-md transition group-hover:translate-x-1">
+          <ArrowRight size={22} />
+        </span>
+      </span>
+    </button>
+  );
+}
+
+function ResultBusinessCta() {
+  return (
+    <div className="grid gap-3 pt-2">
+      <Card className="border-sky-100 bg-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg">
+        <CardContent className="space-y-3 p-4">
+          <div className="flex items-start gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-sky-50 text-sky-700">
+              <ShieldCheck size={21} />
+            </span>
+            <div>
+              <h2 className="text-lg font-black leading-snug text-slate-950">従業員全体の体力を見える化しませんか？</h2>
+              <p className="mt-2 text-sm font-semibold leading-7 text-slate-700">
+                企業向けには、体力測定・作業負荷の見える化・運動指導を組み合わせた軽労化ナビをご提案しています。
+              </p>
+            </div>
+          </div>
+          <Button asChild className="h-12 w-full rounded-full bg-sky-600 transition hover:bg-sky-700">
+            <Link href="/business">
+              企業向けページを見る
+              <ArrowRight size={17} />
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
@@ -637,8 +804,10 @@ function RecommendScreen({
           <div className="flex items-start justify-between gap-4 rounded-lg bg-sky-600/18 p-4 backdrop-blur-sm">
             <div className="space-y-1">
               <p className="text-sm font-black uppercase tracking-[0.16em] text-white/80">Exercise</p>
-              <h1 className="text-3xl font-black leading-tight">おすすめ運動</h1>
-              <p className="text-sm font-bold text-white/90">今の体力に合う3つを提案</p>
+              <h1 className="text-3xl font-black leading-tight">あなたにおすすめの運動</h1>
+              <p className="text-sm font-bold text-white/90">
+                結果に合わせて、無理なく始められる運動を提案します。
+              </p>
             </div>
             <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white text-[#1687aa] shadow-lg">
               <Dumbbell size={28} />
@@ -659,7 +828,11 @@ function RecommendScreen({
 
           <div className="grid gap-3">
             {exercises.map((exercise, index) => (
-              <Card key={`${exercise.id}-${index}`} className="overflow-hidden border-white/80 bg-white shadow-lg">
+              <Card
+                key={`${exercise.id}-${index}`}
+                className="overflow-hidden border-white/80 bg-white shadow-lg [animation:fade-in-up_520ms_ease-out_both]"
+                style={{ animationDelay: `${index * 90}ms` }}
+              >
                 <CardHeader>
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex gap-3">
@@ -671,6 +844,10 @@ function RecommendScreen({
                           <Badge>{exercise.category}</Badge>
                           <Badge className="border-emerald-100 bg-emerald-50 text-emerald-700">
                             {exercise.difficulty}
+                          </Badge>
+                          <Badge className="border-sky-100 bg-sky-50 text-sky-700">
+                            <Clock size={13} />
+                            所要時間 {exerciseDuration(exercise)}
                           </Badge>
                         </div>
                         <CardTitle>{exercise.title}</CardTitle>
@@ -685,10 +862,14 @@ function RecommendScreen({
                     title="トレーナー"
                     message={recommendationReason(exercise, result)}
                   />
-                  {exercise.caution && (
-                    <p className="rounded-lg bg-amber-50 p-3 text-xs leading-6 text-amber-800">
-                      {exercise.caution}
-                    </p>
+                  {exercise.caution && <ExerciseCautionNote text={exercise.caution} />}
+                  {exercise.video_url && (
+                    <Button asChild variant="outline" className="h-11 w-full rounded-full">
+                      <a href={exercise.video_url} target="_blank" rel="noreferrer">
+                        動画を見る
+                        <ExternalLink size={16} />
+                      </a>
+                    </Button>
                   )}
                 </CardContent>
               </Card>
@@ -708,6 +889,17 @@ function RecommendScreen({
   );
 }
 
+function ExerciseCautionNote({ text }: { text: string }) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-slate-600">
+      <p className="flex items-start gap-1.5 text-xs font-medium leading-6">
+        <ShieldCheck size={13} className="mt-1 shrink-0 text-slate-400" />
+        <span>{text}</span>
+      </p>
+    </div>
+  );
+}
+
 function recommendationReason(exercise: Exercise, result: CheckResult) {
   if (result.gripScore <= 2 && exercise.target_scores.includes("筋力")) {
     return "筋力の点数を補いやすい運動です。";
@@ -723,6 +915,12 @@ function recommendationReason(exercise: Exercise, result: CheckResult) {
   }
 
   return "現在の結果と相性がよく、無理なく体力づくりにつなげやすい運動です。";
+}
+
+function exerciseDuration(exercise: Exercise) {
+  if (exercise.difficulty === "しっかり") return "8分";
+  if (exercise.difficulty === "ふつう") return "5分";
+  return "3分";
 }
 
 function TrainerAdvice({ tendency, advice }: { tendency: string; advice: string }) {

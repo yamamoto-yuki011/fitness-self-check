@@ -32,6 +32,8 @@ export default function ContactPage() {
   const [phone, setPhone] = useState("");
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [message, setMessage] = useState("");
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [statusMessage, setStatusMessage] = useState("");
 
   function toggleItem(item: string) {
     setSelectedItems((current) =>
@@ -39,24 +41,35 @@ export default function ContactPage() {
     );
   }
 
-  function sendMail() {
-    const subject = "【軽労化ナビ】導入相談・お問い合わせ";
-    const body = [
-      "軽労化ナビ 導入相談・お問い合わせ",
-      "",
-      `会社名: ${company}`,
-      `ご担当者名: ${name}`,
-      `メールアドレス: ${email}`,
-      `電話番号: ${phone}`,
-      `相談したい内容: ${selectedItems.length > 0 ? selectedItems.join("、") : "未選択"}`,
-      "",
-      "ご相談内容:",
-      message || "未入力",
-      "",
-      "送信元: 3分体力セルフチェック",
-    ].join("\n");
+  async function sendMail() {
+    setStatus("sending");
+    setStatusMessage("");
 
-    window.location.href = `mailto:info@smartsupport.co.jp?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const response = await fetch("/api/contact", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        company,
+        name,
+        email,
+        phone,
+        selectedItems,
+        message,
+      }),
+    });
+
+    const data = (await response.json()) as { error?: string };
+
+    if (!response.ok) {
+      setStatus("error");
+      setStatusMessage(data.error ?? "送信に失敗しました。時間をおいて再度お試しください。");
+      return;
+    }
+
+    setStatus("success");
+    setStatusMessage("送信しました。担当者よりご連絡いたします。");
   }
 
   return (
@@ -97,7 +110,7 @@ export default function ContactPage() {
                 <p className="text-sm font-black uppercase tracking-[0.14em] text-sky-700">Request</p>
                 <h2 className="mt-1 text-2xl font-black text-slate-950">相談内容を送る</h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  入力内容をメール本文にまとめ、`info@smartsupport.co.jp` 宛のメール作成画面を開きます。
+                  入力内容は `info@smartsupport.co.jp` 宛に送信されます。
                 </p>
               </div>
 
@@ -144,11 +157,21 @@ export default function ContactPage() {
                   type="button"
                   size="lg"
                   onClick={sendMail}
+                  disabled={status === "sending"}
                   className="h-14 w-full rounded-full bg-sky-700 text-base hover:bg-sky-800"
                 >
-                  メールを作成する
+                  {status === "sending" ? "送信中..." : "送信する"}
                   <ArrowRight size={18} />
                 </Button>
+                {statusMessage && (
+                  <p
+                    className={`rounded-lg px-3 py-2 text-sm font-bold ${
+                      status === "success" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"
+                    }`}
+                  >
+                    {statusMessage}
+                  </p>
+                )}
               </form>
             </CardContent>
           </Card>
